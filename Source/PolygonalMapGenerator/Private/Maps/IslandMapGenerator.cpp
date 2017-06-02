@@ -13,13 +13,6 @@ AIslandMapGenerator::AIslandMapGenerator()
 	bCurrentStepIsDone = true;
 	bHasGeneratedHeightmap = false;
 
-	TestMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Test Mesh"));
-	this->RootComponent = TestMesh;
-
-	// and finally register the static mesh component
-	TestMesh->RegisterComponent();
-
-
 	MapGraph = CreateDefaultSubobject<UPolygonMap>(TEXT("Polygon Map"));
 }
 
@@ -241,29 +234,29 @@ int32 AIslandMapGenerator::GetEdgeNum() const
 	return MapGraph->GetEdgeNum();
 }
 
-FMapCenter AIslandMapGenerator::GetCenter(const int32 index) const
+FMapCenter& AIslandMapGenerator::GetCenter(const int32 index) const
 {
 	return MapGraph->GetCenter(index);
 }
-FMapCorner AIslandMapGenerator::GetCorner(const int32 index) const
+FMapCorner& AIslandMapGenerator::GetCorner(const int32 index) const
 {
 	return MapGraph->GetCorner(index);
 }
-FMapEdge AIslandMapGenerator::GetEdge(const int32 index) const
+FMapEdge& AIslandMapGenerator::GetEdge(const int32 index) const
 {
 	return MapGraph->GetEdge(index);
 }
-FMapEdge AIslandMapGenerator::FindEdgeFromCenters(const FMapCenter& v0, const FMapCenter& v1) const
+FMapEdge& AIslandMapGenerator::FindEdgeFromCenters(const FMapCenter& v0, const FMapCenter& v1) const
 {
 	return MapGraph->FindEdgeFromCenters(v0, v1);
 }
 
-FMapEdge AIslandMapGenerator::FindEdgeFromCorners(const FMapCorner& v0, const FMapCorner& v1) const
+FMapEdge& AIslandMapGenerator::FindEdgeFromCorners(const FMapCorner& v0, const FMapCorner& v1) const
 {
 	return MapGraph->FindEdgeFromCorners(v0, v1);
 }
 
-void AIslandMapGenerator::UpdateCenter(const FMapCenter& center)
+/*void AIslandMapGenerator::UpdateCenter(const FMapCenter& center)
 {
 	if (MapGraph == NULL)
 	{
@@ -286,7 +279,7 @@ void AIslandMapGenerator::UpdateEdge(const FMapEdge& edge)
 		return;
 	}
 	MapGraph->UpdateEdge(edge);
-}
+}*/
 
 void AIslandMapGenerator::AssignElevation()
 {
@@ -358,7 +351,7 @@ void AIslandMapGenerator::NormalizePoints()
 
 	for (int i = 0; i < GetCornerNum(); i++)
 	{
-		FMapCorner corner = GetCorner(i);
+		FMapCorner& corner = GetCorner(i);
 		corner.CornerData.Elevation = FMath::Clamp(corner.CornerData.Elevation, 0.0f, 1.0f);
 		corner.CornerData.Moisture = FMath::Clamp(corner.CornerData.Moisture, 0.0f, 1.0f);
 
@@ -368,12 +361,12 @@ void AIslandMapGenerator::NormalizePoints()
 			corner.CornerData.Elevation = FMath::Clamp(0.1f + (corner.CornerData.Elevation * 0.9f), 0.0f, 1.0f);
 		}
 
-		UpdateCorner(corner);
+		//UpdateCorner(corner);
 	}
 
 	for (int i = 0; i < GetCenterNum(); i++)
 	{
-		FMapCenter center = GetCenter(i);
+		FMapCenter& center = GetCenter(i);
 		center.CenterData.Elevation = FMath::Clamp(center.CenterData.Elevation, 0.0f, 1.0f);
 		center.CenterData.Moisture = FMath::Clamp(center.CenterData.Moisture, 0.0f, 1.0f);
 
@@ -382,7 +375,7 @@ void AIslandMapGenerator::NormalizePoints()
 			// If this point is not ocean, raise it above ocean level
 			center.CenterData.Elevation = FMath::Clamp(0.1f + (center.CenterData.Elevation * 0.9f), 0.0f, 1.0f);
 		}
-		UpdateCenter(center);
+		//UpdateCenter(center);
 	}
 
 	UE_LOG(LogWorldGen, Log, TEXT("Points normalized in %f seconds."), FPlatformTime::Seconds() - CurrentGenerationTime);
@@ -399,18 +392,18 @@ void AIslandMapGenerator::DetermineBiomes()
 	
 	for (int i = 0; i < GetCornerNum(); i++)
 	{
-		FMapCorner corner = GetCorner(i);
+		FMapCorner& corner = GetCorner(i);
 		FGameplayTag biome = BiomeManager->DetermineBiome(corner.CornerData);
 		corner.CornerData.Biome = biome;
-		UpdateCorner(corner);
+		//UpdateCorner(corner);
 	}
 
 	for (int i = 0; i < GetCenterNum(); i++)
 	{
-		FMapCenter center = GetCenter(i);
+		FMapCenter& center = GetCenter(i);
 		FGameplayTag biome = BiomeManager->DetermineBiome(center.CenterData);
 		center.CenterData.Biome = biome;
-		UpdateCenter(center);
+		//UpdateCenter(center);
 	}
 
 	UE_LOG(LogWorldGen, Log, TEXT("Biomes determined in %f seconds."), FPlatformTime::Seconds() - CurrentGenerationTime);
@@ -437,10 +430,6 @@ void AIslandMapGenerator::CreateHeightmap(const int32 HeightmapSize, const FIsla
 void AIslandMapGenerator::OnHeightmapFinished()
 {
 	bHasGeneratedHeightmap = true;
-	if (TestMesh != NULL)
-	{
-		IslandMaterialInstanceDynamic = TestMesh->CreateAndSetMaterialInstanceDynamic(0);
-	}
 	if (OnHeightmapComplete.IsBound())
 	{
 		OnHeightmapComplete.Execute();
@@ -455,7 +444,7 @@ void AIslandMapGenerator::DrawVoronoiGraph()
 	{
 		return;
 	}
-	UMapDebugVisualizer::DrawDebugVoronoiGrid(this, IslandData.PolygonMapSettings, MapGraph->Corners, MapGraph->Edges, IslandData.Size);
+	//UMapDebugVisualizer::DrawDebugVoronoiGrid(this, IslandData.PolygonMapSettings, MapGraph->Corners, MapGraph->Edges, IslandData.Size);
 }
 
 void AIslandMapGenerator::DrawDelaunayGraph()
@@ -464,7 +453,7 @@ void AIslandMapGenerator::DrawDelaunayGraph()
 	{
 		return;
 	}
-	UMapDebugVisualizer::DrawDebugDelaunayGrid(this, IslandData.PolygonMapSettings, MapGraph->Centers, MapGraph->Edges, IslandData.Size);
+	//UMapDebugVisualizer::DrawDebugDelaunayGrid(this, IslandData.PolygonMapSettings, MapGraph->Centers, MapGraph->Edges, IslandData.Size);
 }
 
 void AIslandMapGenerator::DrawHeightmap(float PixelSize)

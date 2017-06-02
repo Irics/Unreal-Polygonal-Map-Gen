@@ -40,7 +40,7 @@ void UElevationDistributor::AssignCornerElevations(UIslandShape* islandShape, bo
 			// This will be rescaled later
 			corner.CornerData.Elevation = 100.0f;
 		}
-		MapGraph->UpdateCorner(corner);
+		//MapGraph->UpdateCorner(corner);
 	}
 
 	float queueOffsetAmount = 0.0f;
@@ -52,7 +52,7 @@ void UElevationDistributor::AssignCornerElevations(UIslandShape* islandShape, bo
 
 		for (int i = 0; i < corner.Adjacent.Num(); i++)
 		{
-			FMapCorner adjacent = MapGraph->GetCorner(corner.Adjacent[i]);
+			FMapCorner& adjacent = *corner.Adjacent[i];
 			float newElevation = 0.1f + corner.CornerData.Elevation;
 			//newElevation += queueOffsetAmount;
 			if (!UMapDataHelper::IsWater(corner.CornerData) && !UMapDataHelper::IsWater(adjacent.CornerData))
@@ -81,7 +81,7 @@ void UElevationDistributor::AssignCornerElevations(UIslandShape* islandShape, bo
 				cornerQueue.Enqueue(adjacent.Index);
 			}
 
-			MapGraph->UpdateCorner(adjacent);
+			//MapGraph->UpdateCorner(adjacent);
 		}
 
 		queueOffsetAmount += 0.05f;
@@ -96,28 +96,28 @@ void UElevationDistributor::CalculateDownslopes()
 		int32 downslopeIndex = corner.Index;
 		for (int j = 0; j < corner.Adjacent.Num(); j++)
 		{
-			FMapCorner adjacent = MapGraph->GetCorner(corner.Adjacent[j]);
+			FMapCorner& adjacent = *corner.Adjacent[j];
 			if (adjacent.CornerData.Elevation <= MapGraph->GetCorner(downslopeIndex).CornerData.Elevation)
 			{
 				downslopeIndex = adjacent.Index;
 			}
 		}
 		corner.Downslope = downslopeIndex;
-		MapGraph->UpdateCorner(corner);
+		//MapGraph->UpdateCorner(corner);
 	}
 }
 
 void UElevationDistributor::RedistributeElevations(TArray<int32> landCorners)
 {
-	TArray<FMapCorner> mapCorners;
+	TArray<FMapCorner*> mapCorners;
 
 	for (int i = 0; i < landCorners.Num(); i++)
 	{
-		mapCorners.Add(MapGraph->GetCorner(landCorners[i]));
+		mapCorners.Add(&MapGraph->GetCorner(landCorners[i]));
 	}
 
 	// Sort by elevation
-	mapCorners.HeapSort();
+	//mapCorners.HeapSort();
 
 	float maxElevation = -1.0f;
 	for (int i = 0; i < mapCorners.Num(); i++)
@@ -132,18 +132,17 @@ void UElevationDistributor::RedistributeElevations(TArray<int32> landCorners)
 		{
 			maxElevation = x;
 		}
-		FMapCorner corner = MapGraph->GetCorner(mapCorners[i].Index);
-		corner.CornerData.Elevation = x;
-		MapGraph->UpdateCorner(corner);
+		FMapCorner* corner = mapCorners[i];
+		corner->CornerData.Elevation = x;
+		//MapGraph->UpdateCorner(corner);
 	}
 
 	// Now we normalize all the elevations relative to the largest elevation we have
 	// This places all elevations between 0 and 1
 	for (int i = 0; i < mapCorners.Num(); i++)
 	{
-		FMapCorner corner = MapGraph->GetCorner(mapCorners[i].Index);
-		corner.CornerData.Elevation /= maxElevation;
-		MapGraph->UpdateCorner(corner);
+		mapCorners[i]->CornerData.Elevation /= maxElevation;
+		//MapGraph->UpdateCorner(corner);
 	}
 }
 
@@ -163,7 +162,7 @@ void UElevationDistributor::FlattenWaterElevations()
 		if (UMapDataHelper::IsOcean(corner.CornerData))
 		{
 			corner.CornerData.Elevation = 0.0f;
-			MapGraph->UpdateCorner(corner);
+			//MapGraph->UpdateCorner(corner);
 			processedCorners[i] = true;
 		}
 		/*else if (UMapDataHelper::IsFreshwater(corner.CornerData))
@@ -230,11 +229,11 @@ void UElevationDistributor::AssignPolygonElevations()
 		FMapCenter center = MapGraph->GetCenter(i);
 		for (int32 j = 0; j < center.Corners.Num(); j++)
 		{
-			FMapCorner corner = MapGraph->GetCorner(center.Corners[j]);
-			sumElevation += corner.CornerData.Elevation;
+			FMapCorner* corner = center.Corners[j];
+			sumElevation += corner->CornerData.Elevation;
 		}
 		float elevation = sumElevation / center.Corners.Num();
 		center.CenterData.Elevation = elevation;
-		MapGraph->UpdateCenter(center);
+		//MapGraph->UpdateCenter(center);
 	}
 }

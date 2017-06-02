@@ -120,21 +120,21 @@ public:
 	// Make sure to use the function UpdateCenter() to update the graph
 	// after the MapCenter has been modified. 
 	UFUNCTION(BlueprintPure, Category = "Island Generation|Graph")
-	FMapCenter GetCenter(const int32 index) const;
+	FMapCenter& GetCenter(const int32 index) const;
 	// Returns a MapCorner at the given index.
 	// If the index is invalid, an empty MapCorner will be returned.
 	// This empty MapCorner will have an index of -1.
 	// Make sure to use the function UpdateCorner() to update the graph
 	// after the MapCorner has been modified. 
 	UFUNCTION(BlueprintPure, Category = "Island Generation|Graph")
-	FMapCorner GetCorner(const int32 index) const;
+	FMapCorner& GetCorner(const int32 index) const;
 	// Returns a MapEdge at the given index.
 	// If the index is invalid, an empty MapEdge will be returned.
 	// This empty MapEdge will have an index of -1.
 	// Make sure to use the function UpdateEdge() to update the graph
 	// after the MapEdge has been modified. 
 	UFUNCTION(BlueprintPure, Category = "Island Generation|Graph")
-	FMapEdge GetEdge(const int32 index) const;
+	FMapEdge& GetEdge(const int32 index) const;
 
 	// Returns the MapEdge defined by two adjacent MapCenters.
 	// If the edge doesn't exist, an empty MapEdge will be returned.
@@ -142,14 +142,14 @@ public:
 	// Make sure to use the function UpdateEdge() to update the graph
 	// after the MapEdge has been modified.
 	UFUNCTION(BlueprintPure, Category = "Island Generation|Graph")
-	FMapEdge FindEdgeFromCenters(const FMapCenter& v0, const FMapCenter& v1) const;
+	FMapEdge& FindEdgeFromCenters(const FMapCenter& v0, const FMapCenter& v1) const;
 	// Returns the MapEdge defined by two adjacent MapCorners.
 	// If the edge doesn't exist, an empty MapEdge will be returned.
 	// This empty MapEdge will have an index of -1.
 	// Make sure to use the function UpdateEdge() to update the graph
 	// after the MapEdge has been modified.
 	UFUNCTION(BlueprintPure, Category = "Island Generation|Graph")
-	FMapEdge FindEdgeFromCorners(const FMapCorner& v0, const FMapCorner& v1) const;
+	FMapEdge& FindEdgeFromCorners(const FMapCorner& v0, const FMapCorner& v1) const;
 
 	// Returns the number of MapCenters in our graph.
 	UFUNCTION(BlueprintPure, Category = "Island Generation|Graph")
@@ -171,7 +171,7 @@ public:
 	UPolygonalMapHeightmap* GetHeightmap() const;
 
 	// Update a MapCenter in the graph after it has been modified.
-	UFUNCTION(BlueprintCallable, Category = "Island Generation|Graph")
+	/*UFUNCTION(BlueprintCallable, Category = "Island Generation|Graph")
 	void UpdateCenter(const FMapCenter& center);
 	
 	// Update a MapCorner in the graph after it has been modified.
@@ -180,7 +180,7 @@ public:
 	
 	// Update a MapEdge in the graph after it has been modified.
 	UFUNCTION(BlueprintCallable, Category = "Island Generation|Graph")
-	void UpdateEdge(const FMapEdge& edge);
+	void UpdateEdge(const FMapEdge& edge);*/
 
 	// This adds a new generation step to the list of island generation steps.
 	UFUNCTION(BlueprintCallable, Category = "Island Generation")
@@ -219,15 +219,6 @@ public:
 	// Changing these settings will produce different-looking islands.
 	UPROPERTY(Category = "Island", BlueprintReadWrite, EditAnywhere)
 	FIslandData IslandData;
-
-	UPROPERTY(Category = "Map", BlueprintReadWrite, EditAnywhere)
-	UTextureRenderTarget2D* IslandRenderTarget;
-
-	UPROPERTY(Category = "Map", BlueprintReadWrite, EditAnywhere)
-	UMaterialInstanceDynamic* IslandMaterialInstanceDynamic;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-	UStaticMeshComponent* TestMesh;
 
 protected:
 	// Adds a list of steps that we need to generate our island.

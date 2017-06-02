@@ -19,12 +19,12 @@ bool URiver::IsTributary() const
 
 bool URiver::Terminates() const
 {
-	return RiverCorners.Num() > 0 && (UMapDataHelper::IsOcean(RiverCorners[RiverCorners.Num() - 1].CornerData) || (FeedsInto.Key != NULL && FeedsInto.Key->Terminates()));
+	return RiverCorners.Num() > 0 && (UMapDataHelper::IsOcean(RiverCorners[RiverCorners.Num() - 1]->CornerData) || (FeedsInto.Key != NULL && FeedsInto.Key->Terminates()));
 }
 
-FMapCorner URiver::GetCorner(const int32 Index) const
+FMapCorner& URiver::GetCorner(const int32 Index) const
 {
-	return RiverCorners[Index];
+	return *RiverCorners[Index];
 }
 
 FVector2D URiver::GetPointAtIndex(const int32 Index) const
@@ -64,7 +64,7 @@ FMapEdge URiver::GetDownstreamEdge(const int32 Index) const
 	}
 	else
 	{
-		return MapGraph->FindEdgeFromCorners(RiverCorners[Index], RiverCorners[Index + 1]);
+		return MapGraph->FindEdgeFromCorners(*RiverCorners[Index], *RiverCorners[Index + 1]);
 	}
 }
 
@@ -108,9 +108,9 @@ void URiver::InitializeRiver(UDataTable* NameDataTable, FRandomStream& RandomGen
 	RiverLookup.Add(RiverName, this);
 }
 
-FMapCorner URiver::AddCorner(FMapCorner Corner, const int32 IncreaseRiverAmount /*= 1*/)
+FMapCorner& URiver::AddCorner(FMapCorner& Corner, const int32 IncreaseRiverAmount /*= 1*/)
 {
-	if (RiverCorners.Contains(Corner))
+	if (RiverCorners.Contains(&Corner))
 	{
 		return Corner;
 	}
@@ -123,7 +123,7 @@ FMapCorner URiver::AddCorner(FMapCorner Corner, const int32 IncreaseRiverAmount 
 	//Edge edge = graph.lookupEdgeFromCorner(corners[Length - 1], c);
 	//edge.river = edge.river + 1;
 	//}
-	RiverCorners.Add(Corner);
+	RiverCorners.Add(&Corner);
 
 	if (!IsTributary())
 	{
@@ -136,11 +136,10 @@ FMapCorner URiver::AddCorner(FMapCorner Corner, const int32 IncreaseRiverAmount 
 			nameSuffixID = 2;
 		}*/
 	}
-	MapGraph->UpdateCorner(Corner);
 	return Corner;
 }
 
-bool URiver::JoinRiver(URiver* FeederRiver, FMapCorner JoinLocation, bool bIncreaseRiverVolume /*= true*/)
+bool URiver::JoinRiver(URiver* FeederRiver, FMapCorner& JoinLocation, bool bIncreaseRiverVolume /*= true*/)
 {
 	if (FeederRiver == NULL || FeederRiver == this || FeederRiver == FeedsInto.Key)
 	{
@@ -153,8 +152,7 @@ bool URiver::JoinRiver(URiver* FeederRiver, FMapCorner JoinLocation, bool bIncre
 	{
 		for (int i = joinIndex; i < RiverCorners.Num(); i++)
 		{
-			RiverCorners[i].RiverSize++;
-			MapGraph->UpdateCorner(RiverCorners[i]);
+			RiverCorners[i]->RiverSize++;
 		}
 	}
 
@@ -186,11 +184,10 @@ void URiver::Clear()
 {
 	for (int i = 0; i < RiverCorners.Num(); i++)
 	{
-		FMapCorner corner = RiverCorners[i];
+		FMapCorner& corner = *RiverCorners[i];
 		corner.RiverIndex = -1;
 		corner.River = NULL;
 		corner.RiverSize -= 1;
-		MapGraph->UpdateCorner(corner);
 	}
 	/*foreach(Corner c in corners)
 	{
@@ -215,9 +212,9 @@ void URiver::MoveRiverToHeightmap(UPolygonalMapHeightmap* MapHeightmap)
 	FMapEdge nextEdge;
 	for (int i = 0; i < RiverCorners.Num() - 2; i++)
 	{
-		FMapCorner v0 = RiverCorners[i];
-		FMapCorner v1 = RiverCorners[i + 1];
-		FMapCorner v2 = RiverCorners[i + 2];
+		FMapCorner& v0 = *RiverCorners[i];
+		FMapCorner& v1 = *RiverCorners[i + 1];
+		FMapCorner& v2 = *RiverCorners[i + 2];
 		lastEdge = currentEdge;
 		currentEdge = MapGraph->FindEdgeFromCorners(v0, v1);
 		nextEdge = MapGraph->FindEdgeFromCorners(v1, v2);

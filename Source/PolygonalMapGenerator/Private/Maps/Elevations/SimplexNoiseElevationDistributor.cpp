@@ -20,7 +20,7 @@ void USimplexNoiseElevationDistributor::AssignCornerElevations(UIslandShape* isl
 
 	for (int i = 0; i < MapGraph->GetCornerNum(); i++)
 	{
-		FMapCorner corner = MapGraph->GetCorner(i);
+		FMapCorner& corner = MapGraph->GetCorner(i);
 		/*noise.SetPersistence(0.5f);
 		noise.SetScale(scale);
 		noise.SetBounds(-0.25f, 1.0f);*/
@@ -44,7 +44,7 @@ void USimplexNoiseElevationDistributor::AssignCornerElevations(UIslandShape* isl
 		}
 
 		corner.CornerData.Elevation = noiseValue;
-		MapGraph->UpdateCorner(corner);
+		//MapGraph->UpdateCorner(corner);
 	}
 }
 

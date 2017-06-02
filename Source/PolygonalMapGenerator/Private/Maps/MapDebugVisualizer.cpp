@@ -130,23 +130,23 @@ void UMapDebugVisualizer::DrawDebugVoronoiGrid(AActor* Actor, const FWorldSpaceM
 
 	for (int i = 0; i < Edges.Num(); i++)
 	{
-		int32 worldIndex0;
-		int32 worldIndex1;
+		FMapCorner* worldIndex0;
+		FMapCorner* worldIndex1;
 
 		worldIndex0 = Edges[i].VoronoiEdge0;
-		if (worldIndex0 < 0)
+		if (worldIndex0 == NULL)
 		{
 			continue;
 		}
-		FMapData v0Data = Corners[worldIndex0].CornerData;
+		FMapData v0Data = worldIndex0->CornerData;
 		FVector worldVertex0 = UPolygonMap::ConvertGraphPointToWorldSpace(v0Data, MapData, MapSize);
 
 		worldIndex1 = Edges[i].VoronoiEdge1;
-		if (worldIndex1 < 0)
+		if (worldIndex1 == NULL)
 		{
 			continue;
 		}
-		FMapData v1Data = Corners[worldIndex1].CornerData;
+		FMapData v1Data = worldIndex1->CornerData;
 		FVector worldVertex1 = UPolygonMap::ConvertGraphPointToWorldSpace(v1Data, MapData, MapSize);
 
 		FColor color = FColor(255, 255, 255);
@@ -214,25 +214,25 @@ void UMapDebugVisualizer::DrawDebugDelaunayGrid(AActor* Actor, const FWorldSpace
 
 	for (int i = 0; i < Edges.Num(); i++)
 	{
-		int32 worldIndex0;
-		int32 worldIndex1;
+		FMapCenter* worldIndex0;
+		FMapCenter* worldIndex1;
 
 		worldIndex0 = Edges[i].DelaunayEdge0;
-		if (worldIndex0 < 0)
+		if (worldIndex0 == NULL)
 		{
 			UE_LOG(LogWorldGen, Error, TEXT("No Delaunay Edge 0 for %d!"), i);
 			continue;
 		}
-		FMapData d0Data = Centers[worldIndex0].CenterData;
+		FMapData d0Data = worldIndex0->CenterData;
 		FVector worldVertex0 = UPolygonMap::ConvertGraphPointToWorldSpace(d0Data, MapData, MapSize);
 
 		worldIndex1 = Edges[i].DelaunayEdge1;
-		if (worldIndex1 < 0)
+		if (worldIndex1 == NULL)
 		{
 			UE_LOG(LogWorldGen, Error, TEXT("No Delaunay Edge 1 for %d!"), i);
 			continue;
 		}
-		FMapData d1Data = Centers[worldIndex1].CenterData;
+		FMapData d1Data = worldIndex1->CenterData;
 		FVector worldVertex1 = UPolygonMap::ConvertGraphPointToWorldSpace(d1Data, MapData, MapSize);
 
 		FColor color = FColor(255, 255, 255);
@@ -308,9 +308,9 @@ void UMapDebugVisualizer::DrawRivers(AActor* Actor, const FWorldSpaceMapData& Ma
 		FMapEdge nextEdge;
 		for (int i = 0; i < river->RiverCorners.Num() - 2; i++)
 		{
-			FMapCorner v0 = river->RiverCorners[i];
-			FMapCorner v1 = river->RiverCorners[i + 1];
-			FMapCorner v2 = river->RiverCorners[i + 2];
+			FMapCorner& v0 = *river->RiverCorners[i];
+			FMapCorner& v1 = *river->RiverCorners[i + 1];
+			FMapCorner& v2 = *river->RiverCorners[i + 2];
 			lastEdge = currentEdge;
 			currentEdge = MapGraph->FindEdgeFromCorners(v0, v1);
 			nextEdge = MapGraph->FindEdgeFromCorners(v1, v2);

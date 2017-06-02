@@ -41,8 +41,7 @@ public:
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "River")
 	FString RiverName;*/
 	// A list of all corners making up this River object.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "River")
-	TArray<FMapCorner> RiverCorners;
+	TArray<FMapCorner*> RiverCorners;
 	// The name of this River
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "River")
 	FString RiverName;
@@ -64,7 +63,7 @@ public:
 	// Returns a copy of the FMapCorner at the given index.
 	// Be sure to call UpdateCorner() on the UPolygonMap if the corner gets modified at all.
 	UFUNCTION(BlueprintPure, Category = "River|Graph")
-	FMapCorner GetCorner(const int32 Index) const;
+	FMapCorner& GetCorner(const int32 Index) const;
 	// Returns the 2D location of the FMapCorner at the given index.
 	UFUNCTION(BlueprintPure, Category = "River|Graph")
 	FVector2D GetPointAtIndex(const int32 Index) const;
@@ -83,11 +82,11 @@ public:
 	// Adds a corner to the river.
 	// All points downstream get increased by the IncreaseRiverAmount.
 	UFUNCTION(BlueprintCallable, Category = "River")
-	FMapCorner AddCorner(FMapCorner Corner, const int32 IncreaseRiverAmount = 1);
+	FMapCorner& AddCorner(FMapCorner& Corner, const int32 IncreaseRiverAmount = 1);
 	// Joins the feeder river to this river.
 	// Also sets the FeedsInto data for the feeder river.
 	UFUNCTION(BlueprintCallable, Category = "River")
-	bool JoinRiver(URiver* FeederRiver, FMapCorner JoinLocation, bool bIncreaseRiverVolume = true);
+	bool JoinRiver(URiver* FeederRiver, FMapCorner& JoinLocation, bool bIncreaseRiverVolume = true);
 
 	// Makes this river into a tributary.
 	UFUNCTION(BlueprintCallable, Category = "River")
